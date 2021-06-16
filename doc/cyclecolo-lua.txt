@@ -1,0 +1,62 @@
+*cyclecolo.lua* A floating colorscheme selector for neovim written in lua
+
+Minimum version of neovim: 0.5.0
+
+==============================================================================
+
+INTRODUCTION                                       *cyclecolo-introduction*
+
+This plugin requires neovim `nightly (>= 0.5.0)`
+
+==============================================================================
+
+QUICK START                                        *cyclecolo-quickstart*
+
+Open the selector with :ColoToggle
+>
+  nnoremap <C-n> :ColoToggle<CR>
+  lua require 'cyclecolo'.toggle()
+<
+
+==============================================================================
+
+COMMANDS                                           *cyclecolo-commands*
+
+|:ColoOpen|   	                                      *:ColoOpen*
+Opens the Selector
+
+|:ColoClose|   	                                      *:ColoClose*
+Closes the Selector
+
+|:ColoToggle|   	                                  *:ColoToggle*
+Opens or Closes the Selector
+
+==============================================================================
+
+OPTIONS                                            *cyclecolo-options*
+
+|g:cyclecolo_close_on_confirm|                     *g:cyclecolo_close_on_confirm*
+
+Whether or not to close the window on confirm
+- 'true' or 'false'
+
+|g:cyclecolo_preview_colors|                       *g:cyclecolo_preview_colors*
+
+Whether or not to set colorscheme to current one under the cursor
+- 'true' or 'false'
+
+|g:cyclecolo_preview_text|                         *g:cyclecolo_preview_text*
+
+What string to set in the preview window
+- multiline string
+>
+  example: let g:cyclecolo_preview_text = 'function exampleHere() {
+    \     console.log("okay")
+    \ }'
+
+|g:cyclecolo_preview_text_syntax|                  *g:cyclecolo_preview_text_syntax*
+
+What syntax will be used in the preview window
+- 'syntax'
+>
+  example: let g:cyclecolo_preview_text_syntax = 'javascript'

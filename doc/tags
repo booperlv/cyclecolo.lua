@@ -1,0 +1,12 @@
+:ColoClose	cyclecolo-lua.txt	/*:ColoClose*
+:ColoOpen	cyclecolo-lua.txt	/*:ColoOpen*
+:ColoToggle	cyclecolo-lua.txt	/*:ColoToggle*
+cyclecolo-commands	cyclecolo-lua.txt	/*cyclecolo-commands*
+cyclecolo-introduction	cyclecolo-lua.txt	/*cyclecolo-introduction*
+cyclecolo-options	cyclecolo-lua.txt	/*cyclecolo-options*
+cyclecolo-quickstart	cyclecolo-lua.txt	/*cyclecolo-quickstart*
+cyclecolo.lua	cyclecolo-lua.txt	/*cyclecolo.lua*
+g:cyclecolo_close_on_confirm	cyclecolo-lua.txt	/*g:cyclecolo_close_on_confirm*
+g:cyclecolo_preview_colors	cyclecolo-lua.txt	/*g:cyclecolo_preview_colors*
+g:cyclecolo_preview_text	cyclecolo-lua.txt	/*g:cyclecolo_preview_text*
+g:cyclecolo_preview_text_syntax	cyclecolo-lua.txt	/*g:cyclecolo_preview_text_syntax*

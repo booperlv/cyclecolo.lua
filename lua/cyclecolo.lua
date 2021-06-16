@@ -9,27 +9,63 @@ local previewwin
 local buf
 local win
 
--------------------------
+-----------------
+--Option Defaults
+-----------------
+
+local closeOnConfirm
+if vim.g.cyclecolo_close_on_confirm == nil then
+    closeOnConfirm = false
+else
+    closeOnConfirm = vim.g.cyclecolo_close_on_confirm
+end
+
+local previewColors
+if vim.g.cyclecolo_preview_colors == nil then
+    previewColors = false
+else
+    previewColors = vim.g.cyclecolo_preview_colors
+end
+
+local function previewStringToTable(string)
+    local result = {};
+    for match in (string..'\n'):gmatch("(.-)"..'\n') do
+        table.insert(result, match);
+    end
+    return result;
+end
 
 local previewText
 if vim.g.cyclecolo_preview_text == nil then
-    previewText = {
-        'function canYouHearMe(...) {',
-        '    console.log("I guess this is also a test")',
-        '}'
+    local rawText = [[local function themePreview()
+    local reasonsToExist = {
+        'cool',
+        'I honestly can\'t think of anything else'
     }
+    local indexTables = {}
+    for index, reason in reasonsToExist do
+        table.insert(indexTables, {index, reason})
+    end
+    return indexTables
+end
+themePreview()]]
+    previewText = previewStringToTable(rawText)
 else
-    previewText = vim.g.cyclecolo_preview_text
+    previewText = previewStringToTable(vim.g.cyclecolo_preview_text)
 end
 
 local previewTextSyntax
 if vim.g.cyclecolo_preview_text_syntax == nil then
-    previewTextSyntax = 'javascript'
+    previewTextSyntax = 'lua'
 else
     previewTextSyntax = vim.g.cyclecolo_preview_text_syntax
 end
 
--------------------------
+
+-----------------
+--Window Creation
+-----------------
+
 
 local function createSelectWindow(opts)
     buf = api.nvim_create_buf(false, true)
@@ -49,11 +85,14 @@ local function createPreviewWindow(opts)
 end
 
 
--------------------------
+----------------
+--Preview Colors
+----------------
+
 
 local colorschemeBeforeCycle
 function M.setPreviewHighlights()
-    if api.nvim_win_get_buf(0) == buf then
+    if api.nvim_win_get_buf(0) == buf and previewColors == true then
         if colorschemeBeforeCycle == nil then
             colorschemeBeforeCycle = vim.g.colors_name
         end
@@ -72,8 +111,20 @@ function M.setPreviewHighlights()
     --end
 end
 
--------------------------
 
+-----------------------
+--Interfacing functions
+-----------------------
+
+
+function M.setup()
+    vim.cmd([[
+        command! ColoOpen lua require('cyclecolo').open()
+        command! ColoClose lua require('cyclecolo').close()
+        command! ColoToggle lua require('cyclecolo').toggle()
+        command! ColoConfirm lua require('cyclecolo').confirm()
+    ]])
+end
 
 local isCycleOpen = false
 
@@ -111,7 +162,6 @@ function M.open()
         col=position['col'],
         width=dimensions['width'],
         height=dimensions['height'],
-        noautocmd=true,
         border='single',
         style='minimal',
     })
@@ -122,9 +172,7 @@ function M.open()
         col=previewposition['col'],
         width=dimensions['width'],
         height=dimensions['height'],
-        noautocmd=true,
         border='single',
-        style='minimal',
         focusable=false,
     })
 
@@ -182,7 +230,10 @@ function M.confirm()
         vim.opt.background = currentbackground
 
         colorschemeBeforeCycle = nil
-        M.close()
+
+        if closeOnConfirm == true then
+            M.close()
+        end
     end
 
     --Run all attached events through vim.g.cyclecolo_attach_events variable
