@@ -1,12 +1,15 @@
 local M = {}
 local api = vim.api
 
+-------------------------
 
 local arrayOfColorschemes = vim.fn.getcompletion('', 'color')
 local previewbuf
 local previewwin
 local buf
 local win
+
+-------------------------
 
 local previewText
 if vim.g.cyclecolo_preview_text == nil then
@@ -26,6 +29,8 @@ else
     previewTextSyntax = vim.g.cyclecolo_preview_text_syntax
 end
 
+-------------------------
+
 local function createSelectWindow(opts)
     buf = api.nvim_create_buf(false, true)
     win = api.nvim_open_win(buf, true, opts)
@@ -42,6 +47,33 @@ local function createPreviewWindow(opts)
     api.nvim_win_set_option(previewwin, 'winhl', 'Normal:Normal')
     api.nvim_buf_set_lines(previewbuf, 0, 1, true, previewText)
 end
+
+
+-------------------------
+
+local colorschemeBeforeCycle
+function M.setPreviewHighlights()
+    if api.nvim_win_get_buf(0) == buf then
+        if colorschemeBeforeCycle == nil then
+            colorschemeBeforeCycle = vim.g.colors_name
+        end
+
+        local cursor = api.nvim_win_get_cursor(win)
+        local row = cursor[1]
+        local colorschemeundercursor = arrayOfColorschemes[row]
+
+        api.nvim_command('colorscheme '..colorschemeundercursor)
+    end
+
+    --Maybe oneday when it is stable, set colorscheme only for preview window
+    --local colorhighlights = api.nvim__get_hl_defs(0)
+    --for k,v in pairs(colorhighlights) do
+    --    api.nvim_set_hl(previewwin, k, v)
+    --end
+end
+
+-------------------------
+
 
 local isCycleOpen = false
 
@@ -111,6 +143,13 @@ function M.open()
     end
     setCursorToCurrentColorscheme()
 
+    --Preview autocmd
+    api.nvim_command([[augroup cyclecolo_preview_autocommands]])
+    api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo').setPreviewHighlights()]])
+    api.nvim_command([[augroup END]])
+
+    --Confirm mapping
+    api.nvim_buf_set_keymap(buf, 'n', '<CR>', ":ColoConfirm<CR>", {})
 end
 
 function M.close()
@@ -118,6 +157,14 @@ function M.close()
     api.nvim_buf_delete(buf, {})
     api.nvim_buf_delete(previewbuf, {})
     vim.opt.modifiable = true
+
+    if colorschemeBeforeCycle ~= nil then
+        api.nvim_command('colorscheme '..colorschemeBeforeCycle)
+    end
+
+    api.nvim_command([[augroup cyclecolo_preview_autocommands]])
+    api.nvim_command([[autocmd!]])
+    api.nvim_command([[augroup END]])
 end
 
 
@@ -133,12 +180,16 @@ function M.confirm()
         setColoBasedOnCursorLine()
 
         vim.opt.background = currentbackground
+
+        colorschemeBeforeCycle = nil
+        M.close()
     end
 
     --Run all attached events through vim.g.cyclecolo_attach_events variable
     for _, event in ipairs(vim.g.cyclecolo_attach_events) do
         vim.api.nvim_command('lua '.. event)
     end
+
 end
 
 return M
