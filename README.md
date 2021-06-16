@@ -1,6 +1,6 @@
 # cyclecolo.nvim, A floating colorscheme selector for neovim written in lua
 
-
+https://user-images.githubusercontent.com/65604882/122276725-ab4bc880-cf17-11eb-8c54-a35b704f54c8.mp4
 
 ## Notice
 This plugin requires [neovim nightly (>=0.5.0)](https://github.com/neovim/neovim/wiki/Installing-Neovim).
