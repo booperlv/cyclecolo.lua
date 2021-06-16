@@ -2,17 +2,17 @@
 
 
 
-##Notice
+## Notice
 This plugin requires [neovim nightly (>=0.5.0)](https://github.com/neovim/neovim/wiki/Installing-Neovim).
 
-##Install
+## Install
 
 Install with [vim-plug](https://github.com/junegunn/vim-plug):
 ```vim
 Plug 'booperlv/cyclecolo.lua'
 ```
 
-##Setup
+## Setup
 
 ```vim
 let g:cyclecolo_close_on_confirm = v:true " Whether or not to close the window on confirm
