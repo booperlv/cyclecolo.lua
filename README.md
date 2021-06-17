@@ -23,6 +23,7 @@ let g:cyclecolo_preview_text_syntax = 'javascript' " What syntax will be used in
 
 lua require('cyclecolo').setup()
 nnoremap <leader>ct :ColoToggle<CR>
+" Pressing <CR> in the window will confirm/apply the colorscheme :)
 ```
 ## Commands
 
