@@ -5,8 +5,6 @@ add function that will switch colorscheme to the current line hovered
 
 TODO:
 + make things more customizable
-x create a preview window, with window specific colorscheme and customizable preview message
-    note: https://github.com/neovim/neovim/pull/6597, https://github.com/neovim/neovim/issues/1457
-    find way to list key-value pairs of all highlight groups of each colorscheme, and apply into above (winhighlight)
 + create setup function
   add search prompt like telescope? (or modify search / behavior by automatically pressing <CR> when search matches a colorscheme)
+  add sort options
