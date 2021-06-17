@@ -61,6 +61,12 @@ else
     previewTextSyntax = vim.g.cyclecolo_preview_text_syntax
 end
 
+local attachEvents
+if vim.g.cyclecolo_attach_events == nil then
+    attachEvents = {}
+else
+    attachEvents = vim.g.cyclecolo_attach_events
+end
 
 -----------------
 --Window Creation
@@ -237,7 +243,7 @@ function M.confirm()
     end
 
     --Run all attached events through vim.g.cyclecolo_attach_events variable
-    for _, event in ipairs(vim.g.cyclecolo_attach_events) do
+    for _, event in ipairs(attachEvents) do
         vim.api.nvim_command('lua '.. event)
     end
 

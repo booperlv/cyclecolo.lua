@@ -60,3 +60,10 @@ What syntax will be used in the preview window
 - 'syntax'
 >
   example: let g:cyclecolo_preview_text_syntax = 'javascript'
+
+|g:cyclecolo_attach_events|                        *g:cyclecolo_attach_events*
+
+Lua functions to attach to colorscheme change/confirm
+- { 'table of strings, which contain lua functions to run' }
+>
+  example: let g:cyclecolo_attach_events = [ 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' ]

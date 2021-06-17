@@ -20,6 +20,7 @@ let g:cyclecolo_close_on_confirm = v:false " Whether or not to close the window 
 let g:cyclecolo_preview_colors = v:false " Whether or not to set colorscheme to current one under the cursor
 let g:cyclecolo_preview_text = 'function test() {}' " String to set in the preview window 
 let g:cyclecolo_preview_text_syntax = 'javascript' " What syntax will be used in the preview window
+let g:cyclecolo_attach_events = [ 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' ]  " Lua functions to attach to colorscheme change/confirm
 
 lua require('cyclecolo').setup()
 nnoremap <leader>ct :ColoToggle<CR>
