@@ -21,5 +21,5 @@ let g:cyclecolo_preview_text = 'function test() {}' " String to set in the previ
 let g:cyclecolo_preview_text_syntax = 'javascript' " What syntax will be used in the preview window
 
 lua require('cyclecolo').setup()
-nnoremap <C-n> :ColoToggle<CR>
+nnoremap <leader>ct :ColoToggle<CR>
 ```
