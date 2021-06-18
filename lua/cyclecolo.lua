@@ -78,6 +78,7 @@ local function createSelectWindow(opts)
     win = api.nvim_open_win(buf, true, opts)
 
     api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
+    api.nvim_win_set_option(win, 'winblend', 15)
     api.nvim_buf_set_lines(buf, 0, 1, true, arrayOfColorschemes)
 end
 
@@ -87,6 +88,7 @@ local function createPreviewWindow(opts)
 
     api.nvim_win_call(previewwin, loadstring('vim.opt.syntax = "'.. previewTextSyntax ..'"'))
     api.nvim_win_set_option(previewwin, 'winhl', 'Normal:Normal')
+    api.nvim_win_set_option(win, 'winblend', 15)
     api.nvim_buf_set_lines(previewbuf, 0, 1, true, previewText)
 end
 
@@ -145,29 +147,26 @@ end
 function M.open()
     isCycleOpen = true
 
-    local currentwinheight = api.nvim_win_get_height(0)
-    local currentwinwidth = api.nvim_win_get_width(0)
+    local padding = vim.o.columns/30
 
-    local distance = math.floor(currentwinwidth/20)
-    local dimensions = {
-        width = math.floor((currentwinwidth/2) - distance),
-        height = math.floor(currentwinheight - distance) ,
-    }
+    local width = math.floor(vim.o.columns * 0.45)
+    local height = math.floor(vim.o.lines * 0.8)
+
     local position = {
-        row = currentwinheight/2 - dimensions.height/2,
-        col = (currentwinwidth*0.25 - dimensions.width/2) + distance/4
+        row = math.floor((vim.o.lines - height)/2),
+        col = math.floor(((vim.o.columns - width)/2) - width/2) - padding/2
     }
     local previewposition = {
-        row = currentwinheight/2 - dimensions.height/2,
-        col = ((currentwinwidth*0.25 - dimensions.width/2) + dimensions.width + distance) - distance/4
+        row = math.floor((vim.o.lines - height)/2),
+        col = math.floor(((vim.o.columns - width)/2) + width/2) + padding/2
     }
 
     createSelectWindow({
         relative="editor",
         row=position['row'],
         col=position['col'],
-        width=dimensions['width'],
-        height=dimensions['height'],
+        width=width,
+        height=height,
         border='single',
         style='minimal',
     })
@@ -176,8 +175,8 @@ function M.open()
         relative="editor",
         row=previewposition['row'],
         col=previewposition['col'],
-        width=dimensions['width'],
-        height=dimensions['height'],
+        width=width,
+        height=height,
         border='single',
         focusable=false,
     })
@@ -196,6 +195,8 @@ function M.open()
         api.nvim_win_set_cursor(win, {indexOfCurrentColorscheme, 0})
     end
     setCursorToCurrentColorscheme()
+
+    --api.nvim_command('call feedkeys("/", "n")')
 
     --Preview autocmd
     api.nvim_command([[augroup cyclecolo_preview_autocommands]])
