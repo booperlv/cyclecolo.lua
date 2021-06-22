@@ -78,6 +78,7 @@ end
 -----------------
 
 
+local createdSelect = false
 local function createSelectWindow(opts)
     buf = api.nvim_create_buf(false, true)
     win = api.nvim_open_win(buf, true, opts)
@@ -85,8 +86,10 @@ local function createSelectWindow(opts)
     api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
     api.nvim_win_set_option(win, 'winblend', windowBlend)
     api.nvim_buf_set_lines(buf, 0, 1, true, arrayOfColorschemes)
+    createdSelect = true
 end
 
+local createdPreview = false
 local function createPreviewWindow(opts)
     previewbuf = api.nvim_create_buf(false, true)
     previewwin = api.nvim_open_win(previewbuf, false, opts)
@@ -95,6 +98,7 @@ local function createPreviewWindow(opts)
     api.nvim_win_set_option(previewwin, 'winhl', 'Normal:Normal')
     api.nvim_win_set_option(win, 'winblend', windowBlend)
     api.nvim_buf_set_lines(previewbuf, 0, 1, true, previewText)
+    createdPreview = true
 end
 
 
@@ -150,44 +154,60 @@ function M.toggle()
 end
 
 function M.open()
-    isCycleOpen = true
 
-    local padding = math.floor(vim.o.columns/30)
-    if (vim.o.columns < 60) then
-        padding = 0
+    if (vim.o.columns < 50) then
+        local width = math.floor( vim.o.columns * 0.9 )
+        local height = math.floor( vim.o.lines * 0.8 )
+
+        local position = {
+            row = math.floor(vim.o.lines/2 - height/2),
+            col = math.floor(vim.o.columns/2 - width/2)
+        }
+
+        createSelectWindow({
+            relative="editor",
+            row=position['row'],
+            col=position['col'],
+            width=width,
+            height=height,
+            border='single',
+            style='minimal',
+        })
+
+    else
+        local padding = math.floor( vim.o.columns * 0.045 )
+        local width = math.floor( vim.o.columns * 0.45 )
+        local height = math.floor( vim.o.lines * 0.8 )
+
+        local position = {
+            row = math.floor( (vim.o.lines - height)/2 ),
+            col = 0 + padding
+        }
+        local previewposition = {
+            row = math.floor( (vim.o.lines - height)/2 ),
+            col = math.floor( (vim.o.columns - width) ) - padding
+        }
+
+        createSelectWindow({
+            relative="editor",
+            row=position['row'],
+            col=position['col'],
+            width=width,
+            height=height,
+            border='single',
+            style='minimal',
+        })
+
+        createPreviewWindow({
+            relative="editor",
+            row=previewposition['row'],
+            col=previewposition['col'],
+            width=width,
+            height=height,
+            border='single',
+            focusable=false,
+        })
     end
-
-    local width = math.floor(vim.o.columns * 0.45)
-    local height = math.floor(vim.o.lines * 0.8)
-
-    local position = {
-        row = math.floor((vim.o.lines - height)/2),
-        col = math.floor(0) + padding
-    }
-    local previewposition = {
-        row = math.floor((vim.o.lines - height)/2),
-        col = math.floor(vim.o.columns - width) - padding
-    }
-
-    createSelectWindow({
-        relative="editor",
-        row=position['row'],
-        col=position['col'],
-        width=width,
-        height=height,
-        border='single',
-        style='minimal',
-    })
-
-    createPreviewWindow({
-        relative="editor",
-        row=previewposition['row'],
-        col=previewposition['col'],
-        width=width,
-        height=height,
-        border='single',
-        focusable=false,
-    })
 
     vim.opt.modifiable = false
 
@@ -207,27 +227,39 @@ function M.open()
     --api.nvim_command('call feedkeys("/", "n")')
 
     --Preview autocmd
-    api.nvim_command([[augroup cyclecolo_preview_autocommands]])
+    api.nvim_command([[augroup cyclecolo_autocommands]])
     api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo').setPreviewHighlights()]])
+    api.nvim_command([[autocmd BufLeave * ColoClose]])
     api.nvim_command([[augroup END]])
 
     --Confirm mapping
     api.nvim_buf_set_keymap(buf, 'n', '<CR>', ":ColoConfirm<CR>", {})
+
+    isCycleOpen = true
 end
 
 function M.close()
-    isCycleOpen = false
-    api.nvim_buf_delete(buf, {})
-    api.nvim_buf_delete(previewbuf, {})
+    if createdSelect then
+        api.nvim_buf_delete(buf, {})
+    end
+    if createdPreview then
+        api.nvim_buf_delete(previewbuf, {})
+    end
+
     vim.opt.modifiable = true
 
     if colorschemeBeforeCycle ~= nil then
         api.nvim_command('colorscheme '..colorschemeBeforeCycle)
     end
 
-    api.nvim_command([[augroup cyclecolo_preview_autocommands]])
+    api.nvim_command([[augroup cyclecolo_autocommands]])
     api.nvim_command([[autocmd!]])
     api.nvim_command([[augroup END]])
+
+    createdSelect = false
+    createdPreview = false
+
+    isCycleOpen = false
 end
 
 
