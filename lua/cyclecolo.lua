@@ -13,6 +13,11 @@ local win
 --Option Defaults
 -----------------
 
+local windowBlend
+if vim.g.cyclecolo_window_blend == nil then
+    windowBlend = 5
+end
+
 local closeOnConfirm
 if vim.g.cyclecolo_close_on_confirm == nil then
     closeOnConfirm = false
@@ -78,7 +83,7 @@ local function createSelectWindow(opts)
     win = api.nvim_open_win(buf, true, opts)
 
     api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
-    api.nvim_win_set_option(win, 'winblend', 15)
+    api.nvim_win_set_option(win, 'winblend', windowBlend)
     api.nvim_buf_set_lines(buf, 0, 1, true, arrayOfColorschemes)
 end
 
@@ -88,7 +93,7 @@ local function createPreviewWindow(opts)
 
     api.nvim_win_call(previewwin, loadstring('vim.opt.syntax = "'.. previewTextSyntax ..'"'))
     api.nvim_win_set_option(previewwin, 'winhl', 'Normal:Normal')
-    api.nvim_win_set_option(win, 'winblend', 15)
+    api.nvim_win_set_option(win, 'winblend', windowBlend)
     api.nvim_buf_set_lines(previewbuf, 0, 1, true, previewText)
 end
 
