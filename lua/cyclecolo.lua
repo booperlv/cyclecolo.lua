@@ -152,18 +152,21 @@ end
 function M.open()
     isCycleOpen = true
 
-    local padding = vim.o.columns/30
+    local padding = math.floor(vim.o.columns/30)
+    if (vim.o.columns < 60) then
+        padding = 0
+    end
 
     local width = math.floor(vim.o.columns * 0.45)
     local height = math.floor(vim.o.lines * 0.8)
 
     local position = {
         row = math.floor((vim.o.lines - height)/2),
-        col = math.floor(((vim.o.columns - width)/2) - width/2) - padding/2
+        col = math.floor(0) + padding
     }
     local previewposition = {
         row = math.floor((vim.o.lines - height)/2),
-        col = math.floor(((vim.o.columns - width)/2) + width/2) + padding/2
+        col = math.floor(vim.o.columns - width) - padding
     }
 
     createSelectWindow({
