@@ -241,9 +241,11 @@ end
 function M.close()
     if createdSelect then
         api.nvim_buf_delete(buf, {})
+        createdSelect = false
     end
     if createdPreview then
         api.nvim_buf_delete(previewbuf, {})
+        createdPreview = false
     end
 
     vim.opt.modifiable = true
@@ -255,9 +257,6 @@ function M.close()
     api.nvim_command([[augroup cyclecolo_autocommands]])
     api.nvim_command([[autocmd!]])
     api.nvim_command([[augroup END]])
-
-    createdSelect = false
-    createdPreview = false
 
     isCycleOpen = false
 end
