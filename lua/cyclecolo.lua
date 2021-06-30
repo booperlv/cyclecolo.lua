@@ -155,13 +155,13 @@ end
 
 function M.open()
 
-    if (vim.o.columns < 50) then
+    if (vim.o.columns < 55) then
         local width = math.floor( vim.o.columns * 0.9 )
         local height = math.floor( vim.o.lines * 0.8 )
 
         local position = {
-            row = math.floor(vim.o.lines/2 - height/2),
-            col = math.floor(vim.o.columns/2 - width/2)
+            row = math.floor( (vim.o.lines - height)/2 - 1 ),
+            col = math.floor( (vim.o.columns - width)/2 - 1 )
         }
 
         createSelectWindow({
@@ -175,17 +175,18 @@ function M.open()
         })
 
     else
-        local padding = math.floor( vim.o.columns * 0.045 )
-        local width = math.floor( vim.o.columns * 0.45 )
+        local padding = math.floor( vim.o.columns * 0.05 )
+        local width = math.floor( vim.o.columns * 0.425 )
         local height = math.floor( vim.o.lines * 0.8 )
 
         local position = {
-            row = math.floor( (vim.o.lines - height)/2 ),
+            row = math.floor( (vim.o.lines - height)/2 - 1 ),
             col = 0 + padding
         }
         local previewposition = {
-            row = math.floor( (vim.o.lines - height)/2 ),
-            col = math.floor( (vim.o.columns - width) ) - padding
+            row = math.floor( (vim.o.lines - height)/2 - 1 ),
+            --col = math.floor( (vim.o.columns - width) ) - padding
+            col = math.floor( (position.col + width + padding) )
         }
 
         createSelectWindow({
