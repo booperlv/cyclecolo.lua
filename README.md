@@ -3,9 +3,6 @@
 ![cyclecolo demo](https://user-images.githubusercontent.com/65604882/122340239-9f422400-cf74-11eb-83d1-a2c97b9d23c5.gif)
 *Colorschemes: [miramare](https://github.com/franbach/miramare), [ayu](https://github.com/Shatur/neovim-ayu), [tokyonight](https://github.com/folke/tokyonight.nvim)  Font: [Iosevka](https://github.com/be5invis/Iosevka)*
 
-## Notice
-This plugin requires [neovim nightly (>=0.5.0)](https://github.com/neovim/neovim/wiki/Installing-Neovim).
-
 ## Install
 
 Install with [vim-plug](https://github.com/junegunn/vim-plug):
