@@ -13,25 +13,6 @@ local win
 --Option Defaults
 -----------------
 
-local windowBlend
-if vim.g.cyclecolo_window_blend == nil then
-    windowBlend = 5
-end
-
-local closeOnConfirm
-if vim.g.cyclecolo_close_on_confirm == nil then
-    closeOnConfirm = false
-else
-    closeOnConfirm = vim.g.cyclecolo_close_on_confirm
-end
-
-local previewColors
-if vim.g.cyclecolo_preview_colors == nil then
-    previewColors = false
-else
-    previewColors = vim.g.cyclecolo_preview_colors
-end
-
 local function previewStringToTable(string)
     local result = {};
     for match in (string..'\n'):gmatch("(.-)"..'\n') do
@@ -39,10 +20,7 @@ local function previewStringToTable(string)
     end
     return result;
 end
-
-local previewText
-if vim.g.cyclecolo_preview_text == nil then
-    local rawText = [[local function themePreview()
+local defaultText = [[local function themePreview()
     local reasonsToExist = {
         'cool',
         'I honestly can\'t think of anything else'
@@ -54,29 +32,19 @@ if vim.g.cyclecolo_preview_text == nil then
     return indexTables
 end
 themePreview()]]
-    previewText = previewStringToTable(rawText)
-else
-    previewText = previewStringToTable(vim.g.cyclecolo_preview_text)
-end
 
-local previewTextSyntax
-if vim.g.cyclecolo_preview_text_syntax == nil then
-    previewTextSyntax = 'lua'
-else
-    previewTextSyntax = vim.g.cyclecolo_preview_text_syntax
-end
-
-local attachEvents
-if vim.g.cyclecolo_attach_events == nil then
-    attachEvents = {}
-else
-    attachEvents = vim.g.cyclecolo_attach_events
-end
+local plugOpts = {
+    windowBlend = vim.g.cyclecolo_window_blend or 5,
+    closeOnConfirm = vim.g.cyclecolo_close_on_confirm or false,
+    previewColors = vim.g.cyclecolo_preview_colors or false,
+    previewText = vim.g.cyclecolo_preview_text or previewStringToTable(defaultText),
+    previewTextSyntax = vim.g.cyclecolo_preview_text_syntax or 'lua',
+    attachEvents = vim.g.cyclecolo_attach_events or {},
+}
 
 -----------------
 --Window Creation
 -----------------
-
 
 local createdSelect = false
 local function createSelectWindow(opts)
@@ -84,7 +52,7 @@ local function createSelectWindow(opts)
     win = api.nvim_open_win(buf, true, opts)
 
     api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
-    api.nvim_win_set_option(win, 'winblend', windowBlend)
+    api.nvim_win_set_option(win, 'winblend', plugOpts.windowBlend)
     api.nvim_buf_set_lines(buf, 0, 1, true, arrayOfColorschemes)
     createdSelect = true
 end
@@ -94,22 +62,20 @@ local function createPreviewWindow(opts)
     previewbuf = api.nvim_create_buf(false, true)
     previewwin = api.nvim_open_win(previewbuf, false, opts)
 
-    api.nvim_win_call(previewwin, loadstring('vim.opt.syntax = "'.. previewTextSyntax ..'"'))
+    api.nvim_win_call(previewwin, loadstring('vim.opt.syntax = "'.. plugOpts.previewTextSyntax ..'"'))
     api.nvim_win_set_option(previewwin, 'winhl', 'Normal:Normal')
-    api.nvim_win_set_option(win, 'winblend', windowBlend)
-    api.nvim_buf_set_lines(previewbuf, 0, 1, true, previewText)
+    api.nvim_win_set_option(win, 'winblend', plugOpts.windowBlend)
+    api.nvim_buf_set_lines(previewbuf, 0, 1, true, plugOpts.previewText)
     createdPreview = true
 end
-
 
 ----------------
 --Preview Colors
 ----------------
 
-
 local colorschemeBeforeCycle
 function M.setPreviewHighlights()
-    if api.nvim_win_get_buf(0) == buf and previewColors == true then
+    if api.nvim_win_get_buf(0) == buf and plugOpts.previewColors == true then
         if colorschemeBeforeCycle == nil then
             colorschemeBeforeCycle = vim.g.colors_name
         end
@@ -128,11 +94,9 @@ function M.setPreviewHighlights()
     --end
 end
 
-
 -----------------------
 --Interfacing functions
 -----------------------
-
 
 function M.setup()
     vim.cmd([[
@@ -160,8 +124,8 @@ function M.open()
         local height = math.floor( vim.o.lines * 0.8 )
 
         local position = {
-            row = math.floor( (vim.o.lines - height)/2 - 1 ),
-            col = math.floor( (vim.o.columns - width)/2 - 1 )
+            row = math.floor(((vim.o.lines - height)/2) - 1),
+            col = math.floor(((vim.o.columns - width)/2) - 1),
         }
 
         createSelectWindow({
@@ -173,19 +137,17 @@ function M.open()
             border='single',
             style='minimal',
         })
-
     else
         local padding = math.floor( vim.o.columns * 0.05 )
         local width = math.floor( vim.o.columns * 0.425 )
         local height = math.floor( vim.o.lines * 0.8 )
 
         local position = {
-            row = math.floor( (vim.o.lines - height)/2 - 1 ),
-            col = 0 + padding
+            row = math.floor(((vim.o.lines - height)/2) - 1),
+            col = 1 + padding
         }
         local previewposition = {
-            row = math.floor( (vim.o.lines - height)/2 - 1 ),
-            --col = math.floor( (vim.o.columns - width) ) - padding
+            row = math.floor(((vim.o.lines - height)/2) - 1),
             col = math.floor( (position.col + width + padding) )
         }
 
@@ -225,15 +187,14 @@ function M.open()
     end
     setCursorToCurrentColorscheme()
 
-    --api.nvim_command('call feedkeys("/", "n")')
-
     --Preview autocmd
     api.nvim_command([[augroup cyclecolo_autocommands]])
     api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo').setPreviewHighlights()]])
     api.nvim_command([[autocmd BufLeave * ColoClose]])
     api.nvim_command([[augroup END]])
 
-    --Confirm mapping
+    --Mappings
+    api.nvim_buf_set_keymap(buf, 'n', '<ESC>', ":ColoClose<CR>", {})
     api.nvim_buf_set_keymap(buf, 'n', '<CR>', ":ColoConfirm<CR>", {})
 
     isCycleOpen = true
@@ -278,13 +239,13 @@ function M.confirm()
 
         colorschemeBeforeCycle = nil
 
-        if closeOnConfirm == true then
+        if plugOpts.closeOnConfirm == true then
             M.close()
         end
     end
 
     --Run all attached events through vim.g.cyclecolo_attach_events variable
-    for _, event in ipairs(attachEvents) do
+    for _, event in ipairs(plugOpts.attachEvents) do
         vim.api.nvim_command('lua '.. event)
     end
 

@@ -1,12 +1,10 @@
-*cyclecolo.lua* A floating colorscheme selector for neovim written in lua
-
-Minimum version of neovim: 0.5.0
+*cyclecolo* A floating colorscheme selector for neovim written in lua
 
 ==============================================================================
 
 INTRODUCTION                                       *cyclecolo-introduction*
 
-This plugin requires neovim `nightly (>= 0.5.0)`
+A small floating selector for colorschemes :)
 
 ==============================================================================
 
