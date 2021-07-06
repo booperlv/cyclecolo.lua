@@ -1,6 +1,12 @@
 local M = {}
 local api = vim.api
 
+------------------------
+--Lines to take note of
+----85 -- Add filter option for all default vim colorschemes
+----85 -- Sorting, Grouping via folds, Hide colorschemes
+----249 -- Create "sub-colorschemes" - virtual text variable toggling
+
 -------------------------
 
 local arrayOfColorschemes = vim.fn.getcompletion('', 'color')
@@ -37,12 +43,17 @@ local function mergeDefaultOpts(opts)
     return {
         window_blend = opts["window_blend"] or 5,
         window_breakpoint = opts["window_breakpoint"] or 55,
+
         close_on_confirm = opts["close_on_confirm"] or false,
-        preview_colors = opts["preview_colors"] or false,
+        hover_colors = opts["hover_colors"] or false,
+
+        filter_colorschemes = opts["filter_colorschemes"] or {},
+
         preview_text = previewStringToTable(opts["preview_text"] or defaultText),
         preview_text_syntax = opts["preview_text_syntax"] or 'lua',
+
         attach_events = opts["attach_events"] or {},
-        color_attach = opts["color_attach"] or {}
+        child_cycles = opts["color_attach"] or {}
     }
 end
 
@@ -68,7 +79,32 @@ local function createSelectWindow(opts)
 
     api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
     api.nvim_win_set_option(win, 'winblend', plugOpts.window_blend)
-    api.nvim_buf_set_lines(buf, 0, 1, true, arrayOfColorschemes)
+
+    --Add sorting and stuff here
+    --Hide/remove colorschemes that are inside the filter_colorschemes table
+    local function filterColorschemes()
+        local returnValue = arrayOfColorschemes
+        if plugOpts.filter_colorschemes ~= 'defaults' then
+            for _, filter in pairs(plugOpts.filter_colorschemes) do
+                for index, colorscheme in pairs(returnValue) do
+                    if colorscheme == filter then
+                        table.remove(returnValue, index)
+                    end
+                end
+            end
+        else
+            local default_colorschemes = {'default', 'blue', 'darkblue', 'delek', 'desert', 'elflord', 'evening', 'industry', 'koehler', 'morning', 'murphy', 'pablo', 'peachpuff', 'ron', 'shine', 'slate', 'torte', 'zellner'}
+            for _, filter in pairs(default_colorschemes) do
+                for index, colorscheme in pairs(returnValue) do
+                    if colorscheme == filter then
+                        table.remove(returnValue, index)
+                    end
+                end
+            end
+        end
+        return returnValue
+    end
+    api.nvim_buf_set_lines(buf, 0, 1, true, filterColorschemes())
     createdSelect = true
 end
 
@@ -90,7 +126,7 @@ end
 
 local colorschemeBeforeCycle
 function M.setPreviewHighlights()
-    if api.nvim_win_get_buf(0) == buf and plugOpts.preview_colors == true then
+    if api.nvim_win_get_buf(0) == buf and plugOpts.hover_colors == true then
         if colorschemeBeforeCycle == nil then
             colorschemeBeforeCycle = vim.g.colors_name
         end
@@ -194,7 +230,7 @@ function M.open()
     end
     setCursorToCurrentColorscheme()
 
-    if plugOpts.preview_colors == true then
+    if plugOpts.hover_colors == true then
         api.nvim_command([[augroup cyclecolo_autocommands]])
         api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo').setPreviewHighlights()]])
         api.nvim_command([[autocmd BufLeave * ColoClose]])
@@ -224,7 +260,7 @@ function M.close()
         api.nvim_command('colorscheme '..colorschemeBeforeCycle)
     end
 
-    if plugOpts.preview_colors == true then
+    if plugOpts.hover_colors == true then
         api.nvim_command([[augroup cyclecolo_autocommands]])
         api.nvim_command([[autocmd!]])
         api.nvim_command([[augroup END]])
@@ -239,12 +275,16 @@ function M.confirm()
     if api.nvim_win_get_buf(0) == buf then
         local currentbackground = vim.opt.background
 
-        local function setColoBasedOnCursorLine()
+        --Can set the "variable looping" over here
+        local function setColoBasedOnLineContent()
             local cursor = api.nvim_win_get_cursor(win)
             local row = cursor[1]
-            api.nvim_command('colorscheme ' .. arrayOfColorschemes[row])
+            local rowContent = api.nvim_buf_get_lines(0, row-1, row, true)
+            if rowContent ~= ' ' and rowContent ~= nil then
+                api.nvim_command('colorscheme ' .. rowContent[1])
+            end
         end
-        setColoBasedOnCursorLine()
+        setColoBasedOnLineContent()
 
         vim.opt.background = currentbackground
 

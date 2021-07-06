@@ -38,36 +38,43 @@ Cyclecolo is configured through a lua setup function:
   lua require('cyclecolo').setup {
     window_blend = 5,
     window_breakpoint = 55,
+    filter_colorschemes = {},
     close_on_confirm = false,
-    preview_colors = false,
+    hover_colors = false,
     preview_text = 'lorem ipsum',
     preview_text_syntax = 'javascript',
     attach_events = {}
   }
 
 |window_blend|                         *cyclecolo_window_blend*
-Transparency of the window, 5 is default
-- 0 (no transparency) to 100 (full tranparency)
+Transparency of the window, default is 5 
+- 0 (no transparency) - 100 (full tranparency)
 
 |window_breakpoint|                    *cyclecolo_window_breakpoint*
 When editor size is less than window_breakpoint, it only opens
-the select window, and doesn't open the preview.55 is default
+the select window, and doesn't open the preview. default is 55
 - Any Number
 
 |close_on_confirm|                     *cyclecolo_close_on_confirm*
 
-Whether or not to close the window on confirm
-- 'true' or 'false'
+Whether or not to close the window on confirm, default is false
+- `true` or `false`
 
-|preview_colors|                       *cyclecolo_preview_colors*
+|hover_colors|                         *cyclecolo_hover_colors*
 
 Whether or not to set colorscheme to current one under the cursor
-- 'true' or 'false'
+A 'preview' of sorts. Default is false.
+- `true` or `false`
+
+|filter_colorschemes|                  *cyclecolo_filter_colorschemes*
+
+Which colorschemes to hide/not show in the selector, default is {}
+- 'defaults' or {'table of colorscheme name strings'}
 
 |preview_text|                         *cyclecolo_preview_text*
 
 What string to set in the preview window
-- multiline string
+- 'string'
 >
   example: preview_text = 'function exampleHere() {
     \     console.log("okay")

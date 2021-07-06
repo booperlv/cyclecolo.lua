@@ -6,7 +6,8 @@ add function that will switch colorscheme to the current line hovered
 TODO:
 + make things more customizable
 + create setup function
-  add search prompt like telescope? (or modify search / behavior by automatically pressing <CR> when search matches a colorscheme)
-  add sort options
-  create an option to add 'sub-colorschemes' to loop over variables or "hooks" --Use virtual text as indicator? (or popup window)
-    object with { colorscheme, variable, array of values }
+77  add sort options
+77  add grouping via folds
+249  create an option to add 'sub-colorschemes' to loop over variables or "pre-hooks" --Use virtual text as indicator
+    table with { colorschemename, variable, array of values }
++ add hide colorschemes
