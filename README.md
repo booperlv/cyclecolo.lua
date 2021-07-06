@@ -12,10 +12,9 @@ Plug 'booperlv/cyclecolo.lua'
 
 ## Setup
 
-```vim
-" These are the default options
 ```lua
-lua require('cyclecolo').setup {
+-- These are the default options
+require('cyclecolo').setup {
   window_blend = 5, -- Transparency of window, 0(none)-100(full).
   window_breakpoint = 55, -- Determines the breakpoint where only the select window is shown, any number
   filter_colorschemes = {}, -- Which colorschemes to not show in the selector, 'defaults' or {'table of strings'}
@@ -27,10 +26,12 @@ lua require('cyclecolo').setup {
   attach_events = {'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")'} --Lua functions to attach to colorscheme confirm
 }
 ```
+```vim
 nnoremap <leader>ct :ColoToggle<CR>
 " Pressing <CR> in the window will confirm/apply the colorscheme
 " Pressing <ESC> in the window will exit the window
 ```
+
 ## Commands
 
 ```vim
