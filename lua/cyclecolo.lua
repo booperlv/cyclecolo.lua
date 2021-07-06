@@ -13,14 +13,15 @@ local win
 --Option Defaults
 -----------------
 
-local function previewStringToTable(string)
-    local result = {};
-    for match in (string..'\n'):gmatch("(.-)"..'\n') do
-        table.insert(result, match);
+local function mergeDefaultOpts(opts)
+    local function previewStringToTable(string)
+        local result = {};
+        for match in (string..'\n'):gmatch("(.-)"..'\n') do
+            table.insert(result, match);
+        end
+        return result;
     end
-    return result;
-end
-local defaultText = [[local function themePreview()
+    local defaultText = [[local function themePreview()
     local reasonsToExist = {
         'cool',
         'I honestly can\'t think of anything else'
@@ -29,18 +30,32 @@ local defaultText = [[local function themePreview()
     for index, reason in reasonsToExist do
         table.insert(indexTables, {index, reason})
     end
-    return indexTables
-end
-themePreview()]]
+        return indexTables
+    end
+    themePreview()]]
 
-local plugOpts = {
-    windowBlend = vim.g.cyclecolo_window_blend or 5,
-    closeOnConfirm = vim.g.cyclecolo_close_on_confirm or false,
-    previewColors = vim.g.cyclecolo_preview_colors or false,
-    previewText = vim.g.cyclecolo_preview_text or previewStringToTable(defaultText),
-    previewTextSyntax = vim.g.cyclecolo_preview_text_syntax or 'lua',
-    attachEvents = vim.g.cyclecolo_attach_events or {},
-}
+    return {
+        window_blend = opts["window_blend"] or 5,
+        window_breakpoint = opts["window_breakpoint"] or 55,
+        close_on_confirm = opts["close_on_confirm"] or false,
+        preview_colors = opts["preview_colors"] or false,
+        preview_text = previewStringToTable(opts["preview_text"] or defaultText),
+        preview_text_syntax = opts["preview_text_syntax"] or 'lua',
+        attach_events = opts["attach_events"] or {},
+        color_attach = opts["color_attach"] or {}
+    }
+end
+
+local plugOpts
+function M.setup(opts)
+    vim.cmd([[
+        command! ColoOpen lua require('cyclecolo').open()
+        command! ColoClose lua require('cyclecolo').close()
+        command! ColoToggle lua require('cyclecolo').toggle()
+        command! ColoConfirm lua require('cyclecolo').confirm()
+    ]])
+    plugOpts = mergeDefaultOpts(opts)
+end
 
 -----------------
 --Window Creation
@@ -52,7 +67,7 @@ local function createSelectWindow(opts)
     win = api.nvim_open_win(buf, true, opts)
 
     api.nvim_win_set_option(win, 'winhl', 'Normal:Normal')
-    api.nvim_win_set_option(win, 'winblend', plugOpts.windowBlend)
+    api.nvim_win_set_option(win, 'winblend', plugOpts.window_blend)
     api.nvim_buf_set_lines(buf, 0, 1, true, arrayOfColorschemes)
     createdSelect = true
 end
@@ -62,10 +77,10 @@ local function createPreviewWindow(opts)
     previewbuf = api.nvim_create_buf(false, true)
     previewwin = api.nvim_open_win(previewbuf, false, opts)
 
-    api.nvim_win_call(previewwin, loadstring('vim.opt.syntax = "'.. plugOpts.previewTextSyntax ..'"'))
+    api.nvim_win_call(previewwin, loadstring('vim.opt.syntax = "'.. plugOpts.preview_text_syntax ..'"'))
     api.nvim_win_set_option(previewwin, 'winhl', 'Normal:Normal')
-    api.nvim_win_set_option(win, 'winblend', plugOpts.windowBlend)
-    api.nvim_buf_set_lines(previewbuf, 0, 1, true, plugOpts.previewText)
+    api.nvim_win_set_option(win, 'winblend', plugOpts.window_blend)
+    api.nvim_buf_set_lines(previewbuf, 0, 1, true, plugOpts.preview_text)
     createdPreview = true
 end
 
@@ -75,7 +90,7 @@ end
 
 local colorschemeBeforeCycle
 function M.setPreviewHighlights()
-    if api.nvim_win_get_buf(0) == buf and plugOpts.previewColors == true then
+    if api.nvim_win_get_buf(0) == buf and plugOpts.preview_colors == true then
         if colorschemeBeforeCycle == nil then
             colorschemeBeforeCycle = vim.g.colors_name
         end
@@ -98,15 +113,6 @@ end
 --Interfacing functions
 -----------------------
 
-function M.setup()
-    vim.cmd([[
-        command! ColoOpen lua require('cyclecolo').open()
-        command! ColoClose lua require('cyclecolo').close()
-        command! ColoToggle lua require('cyclecolo').toggle()
-        command! ColoConfirm lua require('cyclecolo').confirm()
-    ]])
-end
-
 local isCycleOpen = false
 
 function M.toggle()
@@ -118,8 +124,9 @@ function M.toggle()
 end
 
 function M.open()
-
-    if (vim.o.columns < 55) then
+    --If columns is less than window breakpoint, only open the select window
+    --and don't open the preview. Otherwise, open both.
+    if (vim.o.columns < plugOpts.window_breakpoint) then
         local width = math.floor( vim.o.columns * 0.9 )
         local height = math.floor( vim.o.lines * 0.8 )
 
@@ -187,13 +194,14 @@ function M.open()
     end
     setCursorToCurrentColorscheme()
 
-    --Preview autocmd
-    api.nvim_command([[augroup cyclecolo_autocommands]])
-    api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo').setPreviewHighlights()]])
-    api.nvim_command([[autocmd BufLeave * ColoClose]])
-    api.nvim_command([[augroup END]])
+    if plugOpts.preview_colors == true then
+        api.nvim_command([[augroup cyclecolo_autocommands]])
+        api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo').setPreviewHighlights()]])
+        api.nvim_command([[autocmd BufLeave * ColoClose]])
+        api.nvim_command([[augroup END]])
+    end
 
-    --Mappings
+    --Map these to the select window, so that when it is deleted the mapping delete as well
     api.nvim_buf_set_keymap(buf, 'n', '<ESC>', ":ColoClose<CR>", {})
     api.nvim_buf_set_keymap(buf, 'n', '<CR>', ":ColoConfirm<CR>", {})
 
@@ -216,11 +224,14 @@ function M.close()
         api.nvim_command('colorscheme '..colorschemeBeforeCycle)
     end
 
-    api.nvim_command([[augroup cyclecolo_autocommands]])
-    api.nvim_command([[autocmd!]])
-    api.nvim_command([[augroup END]])
+    if plugOpts.preview_colors == true then
+        api.nvim_command([[augroup cyclecolo_autocommands]])
+        api.nvim_command([[autocmd!]])
+        api.nvim_command([[augroup END]])
+    end
 
     isCycleOpen = false
+
 end
 
 
@@ -239,13 +250,13 @@ function M.confirm()
 
         colorschemeBeforeCycle = nil
 
-        if plugOpts.closeOnConfirm == true then
+        if plugOpts.close_on_confirm == true then
             M.close()
         end
     end
 
     --Run all attached events through vim.g.cyclecolo_attach_events variable
-    for _, event in ipairs(plugOpts.attachEvents) do
+    for _, event in ipairs(plugOpts.attach_events) do
         vim.api.nvim_command('lua '.. event)
     end
 

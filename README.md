@@ -13,16 +13,19 @@ Plug 'booperlv/cyclecolo.lua'
 ## Setup
 
 ```vim
-let g:cyclecolo_window_blend = 5 " Transparency of window, 0 for no transparency, 100 for full transparency
-let g:cyclecolo_close_on_confirm = v:false " Whether or not to close the window on confirm
-let g:cyclecolo_preview_colors = v:false " Whether or not to set colorscheme to current one under the cursor
-let g:cyclecolo_preview_text = 'function test() {}' " String to set in the preview window 
-let g:cyclecolo_preview_text_syntax = 'javascript' " What syntax will be used in the preview window
-let g:cyclecolo_attach_events = [ 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' ]  " Lua functions to attach to colorscheme change/confirm
-
-lua require('cyclecolo').setup()
+lua require('cyclecolo').setup {
+  window_blend = 5, -- Transparency of window, 0(none)-100(full).
+  window_breakpoint = 55, -- Determines the breakpoint where only the select window is shown, any number
+  close_on_confirm = false, -- Whether or not to close the selector on confirm, true/false
+  preview_colors = false, -- Whether or not to set colorscheme to current one under the cursor
+  preview_text = 'lorem ipsum', -- String to set in the preview window 
+  preview_text_syntax = 'javascript', -- What syntax will be used in the preview window
+  --Alternatively, you can use autocmd for ColorScheme, though cyclecolo does not use this.
+  attach_events = {'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")'} --Lua functions to attach to colorscheme confirm
+}
 nnoremap <leader>ct :ColoToggle<CR>
-" Pressing <CR> in the window will confirm/apply the colorscheme :)
+" Pressing <CR> in the window will confirm/apply the colorscheme
+" Pressing <ESC> in the window will exit the window
 ```
 ## Commands
 

@@ -33,39 +33,56 @@ Opens or Closes the Selector
 
 OPTIONS                                            *cyclecolo-options*
 
-|g:cyclecolo_window_blend|                         *g:cyclecolo_window_blend*
+Cyclecolo is configured through a lua setup function:
+>
+  lua require('cyclecolo').setup {
+    window_blend = 5,
+    window_breakpoint = 55,
+    close_on_confirm = false,
+    preview_colors = false,
+    preview_text = 'lorem ipsum',
+    preview_text_syntax = 'javascript',
+    attach_events = {}
+  }
+
+|window_blend|                         *cyclecolo_window_blend*
 Transparency of the window, 5 is default
 - 0 (no transparency) to 100 (full tranparency)
 
-|g:cyclecolo_close_on_confirm|                     *g:cyclecolo_close_on_confirm*
+|window_breakpoint|                    *cyclecolo_window_breakpoint*
+When editor size is less than window_breakpoint, it only opens
+the select window, and doesn't open the preview.55 is default
+- Any Number
+
+|close_on_confirm|                     *cyclecolo_close_on_confirm*
 
 Whether or not to close the window on confirm
 - 'true' or 'false'
 
-|g:cyclecolo_preview_colors|                       *g:cyclecolo_preview_colors*
+|preview_colors|                       *cyclecolo_preview_colors*
 
 Whether or not to set colorscheme to current one under the cursor
 - 'true' or 'false'
 
-|g:cyclecolo_preview_text|                         *g:cyclecolo_preview_text*
+|preview_text|                         *cyclecolo_preview_text*
 
 What string to set in the preview window
 - multiline string
 >
-  example: let g:cyclecolo_preview_text = 'function exampleHere() {
+  example: preview_text = 'function exampleHere() {
     \     console.log("okay")
     \ }'
 
-|g:cyclecolo_preview_text_syntax|                  *g:cyclecolo_preview_text_syntax*
+|preview_text_syntax|                  *cyclecolo_preview_text_syntax*
 
 What syntax will be used in the preview window
-- 'syntax'
+- 'filetype'
 >
-  example: let g:cyclecolo_preview_text_syntax = 'javascript'
+  example: preview_text_syntax = 'javascript'
 
-|g:cyclecolo_attach_events|                        *g:cyclecolo_attach_events*
+|attach_events|                        *cyclecolo_attach_events*
 
 Lua functions to attach to colorscheme change/confirm, written as strings
 - { 'table of strings, which contain lua functions to run' }
 >
-  example: let g:cyclecolo_attach_events = [ 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' ]
+  example: attach_events = { 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' }
