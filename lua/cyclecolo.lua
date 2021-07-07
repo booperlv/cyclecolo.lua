@@ -1,13 +1,7 @@
 local M = {}
 local api = vim.api
 
-------------------------
---Lines to take note of
-----85 -- Add filter option for all default vim colorschemes
-----85 -- Sorting, Grouping via folds, Hide colorschemes
-----249 -- Create "sub-colorschemes" - virtual text variable toggling
-
--------------------------
+-----------------
 
 local arrayOfColorschemes = vim.fn.getcompletion('', 'color')
 local previewbuf
@@ -15,9 +9,28 @@ local previewwin
 local buf
 local win
 
+
+
 -----------------
 --Option Defaults
 -----------------
+
+
+
+local function tableMerge(t1, t2)
+    for k,v in pairs(t2) do
+        if type(v) == "table" then
+            if type(t1[k] or false) == "table" then
+                tableMerge(t1[k] or {}, t2[k] or {})
+            else
+                t1[k] = v
+            end
+        else
+            t1[k] = v
+        end
+    end
+    return t1
+end
 
 local function mergeDefaultOpts(opts)
     local function previewStringToTable(string)
@@ -36,25 +49,38 @@ local function mergeDefaultOpts(opts)
     for index, reason in reasonsToExist do
         table.insert(indexTables, {index, reason})
     end
-        return indexTables
-    end
-    themePreview()]]
+    return indexTables
+end
+themePreview()]]
 
-    return {
-        window_blend = opts["window_blend"] or 5,
-        window_breakpoint = opts["window_breakpoint"] or 55,
+    local default_opts = {
+        window_blend = 5,
+        window_breakpoint = 55,
 
-        close_on_confirm = opts["close_on_confirm"] or false,
-        hover_colors = opts["hover_colors"] or false,
+        close_on_confirm = false,
+        hover_colors = false,
 
-        filter_colorschemes = opts["filter_colorschemes"] or {},
+        filter_colorschemes = {},
 
-        preview_text = previewStringToTable(opts["preview_text"] or defaultText),
-        preview_text_syntax = opts["preview_text_syntax"] or 'lua',
+        preview_text = defaultText,
+        preview_text_syntax = 'lua',
 
-        attach_events = opts["attach_events"] or {},
-        child_cycles = opts["color_attach"] or {}
+        attach_events = {},
+        child_cycles = {
+            --Format for these children are {colorscheme = 'name', variable = 'name', values = {}}
+        },
+        child_cycles_highlight = "Comment",
+
+        mappings = {
+            close = "<ESC>",
+            confirm = "<CR>",
+            next_child_cycle = "n",
+            prev_child_cycle = "p"
+        }
     }
+    local newTable = tableMerge(default_opts, opts)
+    newTable.preview_text = previewStringToTable(newTable.preview_text)
+    return newTable
 end
 
 local plugOpts
@@ -63,14 +89,20 @@ function M.setup(opts)
         command! ColoOpen lua require('cyclecolo').open()
         command! ColoClose lua require('cyclecolo').close()
         command! ColoToggle lua require('cyclecolo').toggle()
-        command! ColoConfirm lua require('cyclecolo').confirm()
+        nmap <silent> <Plug>ColoConfirm :lua require('cyclecolo').confirm()<CR>
+        nmap <silent> <Plug>ColoNextCCycle :lua require('cyclecolo').incrementChildCycles( vim.v.count1)<CR>
+        nmap <silent> <Plug>ColoPrevCCycle :lua require('cyclecolo').incrementChildCycles(-vim.v.count1)<CR>
     ]])
     plugOpts = mergeDefaultOpts(opts)
 end
 
+
+
 -----------------
 --Window Creation
 -----------------
+
+
 
 local createdSelect = false
 local function createSelectWindow(opts)
@@ -120,34 +152,98 @@ local function createPreviewWindow(opts)
     createdPreview = true
 end
 
-----------------
---Preview Colors
-----------------
+
+
+------------------
+--Feature Handling
+------------------
+
+
+
+local function getContentOfCurrentRow()
+    local cursor = api.nvim_win_get_cursor(win)
+    local row = cursor[1]
+    local rowContent = api.nvim_buf_get_lines(buf, row-1, row, true)
+    return rowContent[1]
+end
 
 local colorschemeBeforeCycle
 function M.setPreviewHighlights()
+    --Maybe oneday when it is possible, set colorscheme only for preview window
     if api.nvim_win_get_buf(0) == buf and plugOpts.hover_colors == true then
         if colorschemeBeforeCycle == nil then
             colorschemeBeforeCycle = vim.g.colors_name
         end
+        local currentHovered = getContentOfCurrentRow()
+        if currentHovered ~= '' then
+            api.nvim_command('colorscheme ' .. currentHovered)
+        end
+    end
+end
 
-        local cursor = api.nvim_win_get_cursor(win)
-        local row = cursor[1]
-        local colorschemeundercursor = arrayOfColorschemes[row]
+local function get_index (tab, val)
+    for i, v in ipairs(tab) do
+        if v == val then
+            return i
+        end
+    end
+end
 
-        api.nvim_command('colorscheme '..colorschemeundercursor)
+-----------------------------
+
+local childCycleNameSpace = api.nvim_create_namespace("childcycle")
+local function setVirtualTextWithValueToRow(value, colorscheme)
+    local indexOfColorscheme = get_index(api.nvim_buf_get_lines(buf, 1, -1, true), colorscheme)
+    api.nvim_buf_clear_namespace(buf, childCycleNameSpace, indexOfColorscheme, indexOfColorscheme+1)
+    api.nvim_buf_set_extmark(buf, childCycleNameSpace, indexOfColorscheme, indexOfColorscheme+1, {
+        virt_text = {{value, "Comment"}},
+    })
+end
+
+function M.incrementChildCycles(count)
+    local function toggleBetweenOpts(colorscheme, variable, values)
+        --Use these weird loadstring functions as we are passing the variable down as a string.
+        --God this took so long to figure out LOL. Only way to access/reference the variable
+        --in this scope is through a loadstring.
+        local variableValue = loadstring("return "..variable)()
+        if variableValue == nil then
+            variableValue = values[1]
+        end
+        local indexOfValue = get_index(values, variableValue)
+        local nextValue
+        if count > 0 then
+            if indexOfValue < #values then
+                nextValue = values[indexOfValue+count]
+            else
+                nextValue = values[1]
+            end
+        else
+            if indexOfValue > 1 then
+                nextValue = values[indexOfValue+count]
+            else
+                nextValue = values[#values]
+            end
+        end
+        loadstring(variable.." = "..'"'..nextValue..'"'.."; return "..variable)()
+        setVirtualTextWithValueToRow(nextValue, colorscheme)
     end
 
-    --Maybe oneday when it is stable, set colorscheme only for preview window
-    --local colorhighlights = api.nvim__get_hl_defs(0)
-    --for k,v in pairs(colorhighlights) do
-    --    api.nvim_set_hl(previewwin, k, v)
-    --end
+    local currentHovered = getContentOfCurrentRow()
+    for _, childObject in pairs(plugOpts.child_cycles) do
+        if childObject.colorscheme == currentHovered then
+            toggleBetweenOpts(childObject.colorscheme, childObject.variable, childObject.values)
+            M.confirm()
+        end
+    end
 end
+
+
 
 -----------------------
 --Interfacing functions
 -----------------------
+
+
 
 local isCycleOpen = false
 
@@ -230,16 +326,32 @@ function M.open()
     end
     setCursorToCurrentColorscheme()
 
+    for _, childObject in pairs(plugOpts.child_cycles) do
+        local variable = loadstring("return "..childObject.variable)()
+        if variable == nil and next(childObject.values) ~= nil then
+            variable = childObject.values[1]
+        end
+        setVirtualTextWithValueToRow(variable, childObject.colorscheme)
+    end
+
     if plugOpts.hover_colors == true then
         api.nvim_command([[augroup cyclecolo_autocommands]])
         api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo').setPreviewHighlights()]])
-        api.nvim_command([[autocmd BufLeave * ColoClose]])
         api.nvim_command([[augroup END]])
     end
 
+    vim.cmd([[
+        augroup cyclecolo_buf_exit
+        autocmd BufLeave * ColoClose
+        augroup END
+    ]])
+
     --Map these to the select window, so that when it is deleted the mapping delete as well
-    api.nvim_buf_set_keymap(buf, 'n', '<ESC>', ":ColoClose<CR>", {})
-    api.nvim_buf_set_keymap(buf, 'n', '<CR>', ":ColoConfirm<CR>", {})
+    api.nvim_buf_set_keymap(buf, 'n', plugOpts.mappings.close, ":ColoClose<CR>", {})
+    api.nvim_buf_set_keymap(buf, 'n', plugOpts.mappings.confirm, "<Plug>ColoConfirm", {})
+    --Add option to map this
+    api.nvim_buf_set_keymap(buf, 'n', plugOpts.mappings.next_child_cycle, "<Plug>ColoNextCCycle", {})
+    api.nvim_buf_set_keymap(buf, 'n', plugOpts.mappings.prev_child_cycle, "<Plug>ColoPrevCCycle", {})
 
     isCycleOpen = true
 end
@@ -266,40 +378,37 @@ function M.close()
         api.nvim_command([[augroup END]])
     end
 
+    vim.cmd([[
+        augroup cyclecolo_buf_exit
+        autocmd!
+        augroup END
+    ]])
     isCycleOpen = false
 
 end
 
 
 function M.confirm()
-    if api.nvim_win_get_buf(0) == buf then
-        local currentbackground = vim.opt.background
+    local currentbackground = vim.opt.background
 
-        --Can set the "variable looping" over here
-        local function setColoBasedOnLineContent()
-            local cursor = api.nvim_win_get_cursor(win)
-            local row = cursor[1]
-            local rowContent = api.nvim_buf_get_lines(0, row-1, row, true)
-            if rowContent ~= ' ' and rowContent ~= nil then
-                api.nvim_command('colorscheme ' .. rowContent[1])
-            end
-        end
-        setColoBasedOnLineContent()
-
-        vim.opt.background = currentbackground
-
-        colorschemeBeforeCycle = nil
-
-        if plugOpts.close_on_confirm == true then
-            M.close()
+    local function setColoBasedOnLineContent()
+        local currentHovered = getContentOfCurrentRow()
+        if currentHovered ~= '' then
+            vim.cmd('colorscheme '..currentHovered)
         end
     end
+    setColoBasedOnLineContent()
 
-    --Run all attached events through vim.g.cyclecolo_attach_events variable
-    for _, event in ipairs(plugOpts.attach_events) do
-        vim.api.nvim_command('lua '.. event)
+    vim.opt.background = currentbackground
+
+    colorschemeBeforeCycle = nil
+
+    if plugOpts.close_on_confirm == true then
+        M.close()
     end
-
+    for _, value in pairs(plugOpts.attach_events) do
+        api.nvim_command('lua '..value)
+    end
 end
 
 return M

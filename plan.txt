@@ -6,8 +6,11 @@ add function that will switch colorscheme to the current line hovered
 TODO:
 + make things more customizable
 + create setup function
-77  add sort options
-77  add grouping via folds
-249  create an option to add 'sub-colorschemes' to loop over variables or "pre-hooks" --Use virtual text as indicator
-    table with { colorschemename, variable, array of values }
+85  add sort options
+85  add grouping via folds
++ create an option to add 'sub-colorschemes' to loop over variables or "pre-hooks" --Use virtual text as indicator
++     table with { colorschemename, variable, array of values }
++     Add more documentation
++     Modify the behavior of the indexing, allow the first value in the values array be the first one
 + add hide colorschemes
+  separate into multiple files

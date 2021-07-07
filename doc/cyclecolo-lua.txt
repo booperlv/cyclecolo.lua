@@ -38,12 +38,25 @@ Cyclecolo is configured through a lua setup function:
   lua require('cyclecolo').setup {
     window_blend = 5,
     window_breakpoint = 55,
-    filter_colorschemes = {},
     close_on_confirm = false,
+
+    preview_text = defaultText,
+    preview_text_syntax = 'lua',
+
     hover_colors = false,
-    preview_text = 'lorem ipsum',
-    preview_text_syntax = 'javascript',
-    attach_events = {}
+    filter_colorschemes = {},
+
+    attach_events = {},
+
+    child_cycles = {},
+    child_cycle_highlight = "Comment",
+
+    mappings = {
+      close = "<ESC>",
+      confirm = "<CR>",
+      next_child_cycle = "n",
+      prev_child_cycle = "p"
+    }
   }
 
 |window_blend|                         *cyclecolo_window_blend*
@@ -59,17 +72,6 @@ the select window, and doesn't open the preview. default is 55
 
 Whether or not to close the window on confirm, default is false
 - `true` or `false`
-
-|hover_colors|                         *cyclecolo_hover_colors*
-
-Whether or not to set colorscheme to current one under the cursor
-A 'preview' of sorts. Default is false.
-- `true` or `false`
-
-|filter_colorschemes|                  *cyclecolo_filter_colorschemes*
-
-Which colorschemes to hide/not show in the selector, default is {}
-- 'defaults' or {'table of colorscheme name strings'}
 
 |preview_text|                         *cyclecolo_preview_text*
 
@@ -87,9 +89,56 @@ What syntax will be used in the preview window
 >
   example: preview_text_syntax = 'javascript'
 
+|hover_colors|                         *cyclecolo_hover_colors*
+
+Whether or not to set colorscheme to current one under the cursor
+A 'preview' of sorts. Default is false.
+- `true` or `false`
+
+|filter_colorschemes|                  *cyclecolo_filter_colorschemes*
+
+Which colorschemes to hide/not show in the selector. Default is {}
+- 'defaults' or {'table of colorscheme name strings'}
+
 |attach_events|                        *cyclecolo_attach_events*
 
 Lua functions to attach to colorscheme change/confirm, written as strings
 - { 'table of strings, which contain lua functions to run' }
 >
   example: attach_events = { 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' }
+
+|child_cycles|                         *cyclecolo_child_cycles*
+
+Toggle between colorscheme styles, changes variables before setting the specified
+colorscheme. It also display current value using virtual text. Default is {}
+- { colorscheme = 'name', variable = 'vim.g.variable', values = {'dark', 'light'} }
+>
+  example:
+  child_cycles = {
+    { colorscheme = "material", variable = "vim.g.material_style", values = {
+      "darker", "lighter", "palenight", "oceanic", "deep ocean"
+    }}
+  } 
+
+|child_cycles_highlight|               *cyclecolo_child_cycles_highlight*
+
+What highlight group will be used for the virtual text that indicates the current
+child cycle value. Default is "comment"
+- 'Highlight Group String'
+
+|mappings|                             *cyclecolo_mappings*
+
+Keybindings to be used in the select window. Defaults are
+close = "<ESC>", confirm = "<CR>", next_child_cycle = "n", prev_child_cycle = "p".
+>
+  close
+  confirm
+  next_child_cycle
+  prev_child_cycle
+
+  example:
+  mappings = {
+    close = "<ESC>",
+    next_child_cycle = "n"
+  }
+
