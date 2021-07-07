@@ -206,9 +206,6 @@ function M.incrementChildCycles(count)
         --God this took so long to figure out LOL. Only way to access/reference the variable
         --in this scope is through a loadstring.
         local variableValue = loadstring("return "..variable)()
-        if variableValue == nil then
-            variableValue = values[1]
-        end
         local indexOfValue = get_index(values, variableValue)
         local nextValue
         if count > 0 then
@@ -330,6 +327,7 @@ function M.open()
         local variable = loadstring("return "..childObject.variable)()
         if variable == nil and next(childObject.values) ~= nil then
             variable = childObject.values[1]
+            loadstring(childObject.variable.."="..'"'..childObject.values[1]..'"')()
         end
         setVirtualTextWithValueToRow(variable, childObject.colorscheme)
     end
