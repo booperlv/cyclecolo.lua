@@ -1,7 +1,10 @@
+
 # cyclecolo.nvim, A floating colorscheme selector for neovim written in lua
 
-![cyclecolo demo](https://user-images.githubusercontent.com/65604882/122340239-9f422400-cf74-11eb-83d1-a2c97b9d23c5.gif)
-*Colorschemes: [miramare](https://github.com/franbach/miramare), [ayu](https://github.com/Shatur/neovim-ayu), [tokyonight](https://github.com/folke/tokyonight.nvim)  Font: [Iosevka](https://github.com/be5invis/Iosevka)*
+
+https://user-images.githubusercontent.com/65604882/124722836-06804200-df3d-11eb-92cd-cbff1294e3cf.mp4
+
+*Colorschemes: [tokyonight](https://github.com/folke/tokyonight.nvim), [material](https://github.com/marko-cerovac/material.nvim), [ayu](https://github.com/Shatur/neovim-ayu), [miramare](https://github.com/franbach/miramare)    Font: [Iosevka](https://github.com/be5invis/Iosevka)*
 
 ## Install
 
