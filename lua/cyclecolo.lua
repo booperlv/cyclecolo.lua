@@ -167,17 +167,10 @@ local function getContentOfCurrentRow()
     return rowContent[1]
 end
 
-local colorschemeBeforeCycle
 function M.setPreviewHighlights()
     --Maybe oneday when it is possible, set colorscheme only for preview window
     if api.nvim_win_get_buf(0) == buf and plugOpts.hover_colors == true then
-        if colorschemeBeforeCycle == nil then
-            colorschemeBeforeCycle = vim.g.colors_name
-        end
-        local currentHovered = getContentOfCurrentRow()
-        if currentHovered ~= '' then
-            api.nvim_command('colorscheme ' .. currentHovered)
-        end
+        M.confirm('NeverClose')
     end
 end
 
@@ -370,10 +363,6 @@ function M.close()
 
     vim.opt.modifiable = true
 
-    if colorschemeBeforeCycle ~= nil then
-        api.nvim_command('colorscheme '..colorschemeBeforeCycle)
-    end
-
     if plugOpts.hover_colors == true then
         api.nvim_command([[augroup cyclecolo_autocommands]])
         api.nvim_command([[autocmd!]])
@@ -386,23 +375,25 @@ function M.close()
         augroup END
     ]])
     isCycleOpen = false
-
 end
 
 
-function M.confirm()
+function M.confirm(...)
     local function setColoBasedOnLineContent()
         local currentHovered = getContentOfCurrentRow()
         if currentHovered ~= '' then
+            local prevbackground = vim.o.background
             vim.cmd('colorscheme '..currentHovered)
+            vim.o.background = prevbackground
         end
     end
     setColoBasedOnLineContent()
 
-    colorschemeBeforeCycle = nil
-
-    if plugOpts.close_on_confirm == true then
-        M.close()
+    local closeHandle = {...}
+    if closeHandle[1] ~= "NeverClose" then
+        if plugOpts.close_on_confirm == true then
+            M.close()
+        end
     end
     for _, value in pairs(plugOpts.attach_events) do
         api.nvim_command('lua '..value)
