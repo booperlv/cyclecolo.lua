@@ -260,8 +260,8 @@ function M.open()
         local height = math.floor( vim.o.lines * 0.8 )
 
         local position = {
-            row = math.floor(((vim.o.lines - height)/2) - 1),
-            col = math.floor(((vim.o.columns - width)/2) - 1),
+            row = math.floor( ((vim.o.lines - height )/2) - 1 ),
+            col = math.floor( ((vim.o.columns - width)/2) - 1 ),
         }
 
         createSelectWindow({
@@ -279,12 +279,16 @@ function M.open()
         local height = math.floor( vim.o.lines * 0.8 )
 
         local position = {
-            row = math.floor(((vim.o.lines - height)/2) - 1),
-            col = 1 + padding
+            row = math.floor( ((vim.o.lines - height )/2) - 1 ),
+            --Go to center, then minus width/2 to make both halves' side sit on the same position
+            --Then add padding to set the spacing between both halves
+            col = math.floor( (((vim.o.columns - width)/2) - 1) - (width/2 + padding/2) ),
         }
         local previewposition = {
-            row = math.floor(((vim.o.lines - height)/2) - 1),
-            col = math.floor( (position.col + width + padding) )
+            row = math.floor( ((vim.o.lines - height )/2) - 1 ),
+            --Go to center, then minus width/2 to make both halves' side sit on the same position
+            --Then add padding to set the spacing between both halves
+            col = math.floor( (((vim.o.columns - width)/2) - 1) + (width/2 + padding/2) ),
         }
 
         createSelectWindow({
@@ -325,7 +329,7 @@ function M.open()
 
     for _, childObject in pairs(plugOpts.child_cycles) do
         local variable = loadstring("return "..childObject.variable)()
-        if variable == nil and next(childObject.values) ~= nil then
+        if variable == nil or variable == '' and next(childObject.values) ~= nil then
             variable = childObject.values[1]
             loadstring(childObject.variable.."="..'"'..childObject.values[1]..'"')()
         end
@@ -387,8 +391,6 @@ end
 
 
 function M.confirm()
-    local currentbackground = vim.opt.background
-
     local function setColoBasedOnLineContent()
         local currentHovered = getContentOfCurrentRow()
         if currentHovered ~= '' then
@@ -396,8 +398,6 @@ function M.confirm()
         end
     end
     setColoBasedOnLineContent()
-
-    vim.opt.background = currentbackground
 
     colorschemeBeforeCycle = nil
 
