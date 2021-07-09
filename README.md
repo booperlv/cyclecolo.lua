@@ -39,8 +39,8 @@ require('cyclecolo').setup {
   mappings = { -- Set the mappings in the select window
     close = "<ESC>", -- Close the window
     confirm = "<CR>", -- Confirm/Apply the colorscheme
-    next_child_cycle = "n", -- child_cycle forward (index + 1)
-    prev_child_cycle = "p" -- child_cycle backward (index - 1)
+    next_child_cycle = "n", -- child_cycle forward, has count support 
+    prev_child_cycle = "p" -- child_cycle backward, has count support 
   }
 }
 ```
