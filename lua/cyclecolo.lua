@@ -3,6 +3,8 @@ local api = vim.api
 
 -----------------
 
+
+local defaultBackground = vim.o.background
 local arrayOfColorschemes = vim.fn.getcompletion('', 'color')
 local previewbuf
 local previewwin
@@ -307,19 +309,6 @@ function M.open()
 
     vim.opt.modifiable = false
 
-    local function setCursorToCurrentColorscheme()
-        local currentColorscheme = vim.g.colors_name
-        local indexOfCurrentColorscheme
-        for index,colo in pairs(arrayOfColorschemes) do
-            if colo == currentColorscheme then
-                indexOfCurrentColorscheme = index
-                break
-            end
-        end
-        api.nvim_win_set_cursor(win, {indexOfCurrentColorscheme, 0})
-    end
-    setCursorToCurrentColorscheme()
-
     for _, childObject in pairs(plugOpts.child_cycles) do
         local variable = loadstring("return "..childObject.variable)()
         if variable == nil or variable == '' and next(childObject.values) ~= nil then
@@ -347,6 +336,22 @@ function M.open()
     --Add option to map this
     api.nvim_buf_set_keymap(buf, 'n', plugOpts.mappings.next_child_cycle, "<Plug>ColoNextCCycle", {})
     api.nvim_buf_set_keymap(buf, 'n', plugOpts.mappings.prev_child_cycle, "<Plug>ColoPrevCCycle", {})
+
+    local function setCursorToCurrentColorscheme()
+        local currentColorscheme = vim.g.colors_name
+        local lines = vim.fn.getline(1, '$')
+        local indexOnFile
+        for index, value in pairs(lines) do
+            if currentColorscheme == value then
+                indexOnFile = index
+            end
+        end
+
+        if indexOnFile ~= nil then
+            api.nvim_win_set_cursor(win, {indexOnFile, 0})
+        end
+    end
+    setCursorToCurrentColorscheme()
 
     isCycleOpen = true
 end
@@ -382,9 +387,8 @@ function M.confirm(...)
     local function setColoBasedOnLineContent()
         local currentHovered = getContentOfCurrentRow()
         if currentHovered ~= '' then
-            local prevbackground = vim.o.background
+            vim.o.background = defaultBackground
             vim.cmd('colorscheme '..currentHovered)
-            vim.o.background = prevbackground
         end
     end
     setColoBasedOnLineContent()
