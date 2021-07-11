@@ -176,6 +176,16 @@ function M.setPreviewHighlights()
     end
 end
 
+-----------------------------
+
+local function exists_in (tab, val)
+    for index, value in ipairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+    return false
+end
 local function get_index (tab, val)
     for i, v in ipairs(tab) do
         if v == val then
@@ -183,8 +193,6 @@ local function get_index (tab, val)
         end
     end
 end
-
------------------------------
 
 local childCycleNameSpace = api.nvim_create_namespace("childcycle")
 local function setVirtualTextWithValueToRow(value, colorscheme)
@@ -222,9 +230,11 @@ function M.incrementChildCycles(count)
 
     local currentHovered = getContentOfCurrentRow()
     for _, childObject in pairs(plugOpts.child_cycles) do
-        if childObject.colorscheme == currentHovered then
-            toggleBetweenOpts(childObject.colorscheme, childObject.variable, childObject.values)
-            M.confirm()
+        if exists_in(arrayOfColorschemes, childObject.colorscheme) then
+            if childObject.colorscheme == currentHovered then
+                toggleBetweenOpts(childObject.colorscheme, childObject.variable, childObject.values)
+                M.confirm()
+            end
         end
     end
 end
@@ -313,12 +323,16 @@ function M.open()
 
     for _, childObject in pairs(plugOpts.child_cycles) do
         local variable = loadstring("return "..childObject.variable)()
-        if next(childObject.values) ~= nil then
-            if variable == nil or variable == '' then
-                variable = childObject.values[1]
-                loadstring(childObject.variable.."="..'"'..childObject.values[1]..'"')()
+        if exists_in(arrayOfColorschemes, childObject.colorscheme) then
+            if next(childObject.values) ~= nil then
+                if variable == nil or variable == '' then
+                    variable = childObject.values[1]
+                    loadstring(childObject.variable.."="..'"'..childObject.values[1]..'"')()
+                end
+                setVirtualTextWithValueToRow(variable, childObject.colorscheme)
             end
-            setVirtualTextWithValueToRow(variable, childObject.colorscheme)
+        else
+            print("Can't set the child_cycle for \""..childObject.colorscheme.."\"! Could not be found")
         end
     end
 
