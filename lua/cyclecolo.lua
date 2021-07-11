@@ -190,7 +190,7 @@ local childCycleNameSpace = api.nvim_create_namespace("childcycle")
 local function setVirtualTextWithValueToRow(value, colorscheme)
     local indexOfColorscheme = get_index(api.nvim_buf_get_lines(buf, 1, -1, true), colorscheme)
     api.nvim_buf_clear_namespace(buf, childCycleNameSpace, indexOfColorscheme, indexOfColorscheme+1)
-    api.nvim_buf_set_extmark(buf, childCycleNameSpace, indexOfColorscheme, indexOfColorscheme+1, {
+    api.nvim_buf_set_extmark(buf, childCycleNameSpace, indexOfColorscheme, 1, {
         virt_text = {{value, "Comment"}},
     })
 end
@@ -313,11 +313,13 @@ function M.open()
 
     for _, childObject in pairs(plugOpts.child_cycles) do
         local variable = loadstring("return "..childObject.variable)()
-        if variable == nil or variable == '' and next(childObject.values) ~= nil then
-            variable = childObject.values[1]
-            loadstring(childObject.variable.."="..'"'..childObject.values[1]..'"')()
+        if next(childObject.values) ~= nil then
+            if variable == nil or variable == '' then
+                variable = childObject.values[1]
+                loadstring(childObject.variable.."="..'"'..childObject.values[1]..'"')()
+            end
+            setVirtualTextWithValueToRow(variable, childObject.colorscheme)
         end
-        setVirtualTextWithValueToRow(variable, childObject.colorscheme)
     end
 
     if plugOpts.hover_colors == true then
