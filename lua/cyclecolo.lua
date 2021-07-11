@@ -269,23 +269,23 @@ function M.open()
             style='minimal',
         })
     else
-        local padding = 2
+        local padding = math.floor( vim.o.columns * 0.025 )
         local width = math.floor( vim.o.columns * 0.45 )
         local height = math.floor( vim.o.lines * 0.8 )
 
         local position = {
             row = math.floor( ((vim.o.lines - height )/2) - 1 ),
-            --Go to center, then minus width/2 to make both halves' side sit on the same position
+            --Go to center, then minus width/2 to have right side sit on center
             --Then add padding to set the spacing between both halves
             --  ((centercenter)) -> (-width/2|-width/2) -> (center) spacing (center)
-            col = math.floor( (((vim.o.columns - width)/2) - 1) - (width/2 + padding) ),
+            col = math.floor( (((vim.o.columns - width)/2) - 1) - (width/2) - (padding/2) )
         }
         local previewposition = {
             row = math.floor( ((vim.o.lines - height )/2) - 1 ),
-            --Go to center, then width/2 to make both halves' side sit on the same position
+            --Go to center, then add width/2 to have left side sit on center
             --Then add padding to set the spacing between both halves
             --  ((centercenter)) -> (-width/2|-width/2) -> (center) spacing (center)
-            col = math.floor( (((vim.o.columns - width)/2) - 1) + (width/2 + padding) ),
+            col = math.floor( (((vim.o.columns - width)/2) - 1) + (width/2) + (padding/2) )
         }
 
         createSelectWindow({
