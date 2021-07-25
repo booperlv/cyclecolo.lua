@@ -1,3 +1,4 @@
+
 *cyclecolo* A floating colorscheme selector for neovim written in lua
 
 ==============================================================================
@@ -12,8 +13,7 @@ QUICK START                                        *cyclecolo-quickstart*
 
 Open the selector with :ColoToggle
 >
-  nnoremap <C-n> :ColoToggle<CR>
-  lua require 'cyclecolo'.toggle()
+  nnoremap <leader>ct :ColoToggle<CR>
 <
 
 ==============================================================================
@@ -36,20 +36,13 @@ OPTIONS                                            *cyclecolo-options*
 Cyclecolo is configured through a lua setup function:
 >
   lua require('cyclecolo').setup {
-    window_blend = 5,
-    window_breakpoint = 55,
-    close_on_confirm = false,
-
-    preview_text = defaultText,
-    preview_text_syntax = 'lua',
-
-    hover_colors = false,
     filter_colorschemes = {},
-
+    child_cycles = {
+      {colorscheme = "name", variable = "variable", values = {"value1", "value2"}}
+    },
     attach_events = {},
-
-    child_cycles = {},
-    child_cycle_highlight = "Comment",
+    hover_colors = false,
+    close_on_confirm = false,
 
     mappings = {
       close = "<ESC>",
@@ -57,55 +50,23 @@ Cyclecolo is configured through a lua setup function:
       next_child_cycle = "n",
       prev_child_cycle = "p"
     }
+
+    preview_text = defaultText,
+    preview_text_syntax = 'lua',
+
+    window_border = 'single',
+    window_border_highlight = 'FloatBorder',
+    window_blend = 5,
+    window_breakpoint = 55,
+    child_cycle_highlight = "Comment",
   }
 
-|window_blend|                         *cyclecolo_window_blend*
-Transparency of the window, default is 5 
-- 0 (no transparency) - 100 (full tranparency)
-
-|window_breakpoint|                    *cyclecolo_window_breakpoint*
-When editor size is less than window_breakpoint, it only opens
-the select window, and doesn't open the preview. default is 55
-- Any Number
-
-|close_on_confirm|                     *cyclecolo_close_on_confirm*
-
-Whether or not to close the window on confirm, default is false
-- `true` or `false`
-
-|preview_text|                         *cyclecolo_preview_text*
-
-What string to set in the preview window
-- 'string'
->
-  example: preview_text = 'function exampleHere() {
-    \     console.log("okay")
-    \ }'
-
-|preview_text_syntax|                  *cyclecolo_preview_text_syntax*
-
-What syntax will be used in the preview window
-- 'filetype'
->
-  example: preview_text_syntax = 'javascript'
-
-|hover_colors|                         *cyclecolo_hover_colors*
-
-Whether or not to set colorscheme to current one under the cursor
-A 'preview' of sorts. Default is false.
-- `true` or `false`
 
 |filter_colorschemes|                  *cyclecolo_filter_colorschemes*
 
 Which colorschemes to hide/not show in the selector. Default is {}
 - 'defaults' or {'table of colorscheme name strings'}
 
-|attach_events|                        *cyclecolo_attach_events*
-
-Lua functions to attach to colorscheme change/confirm, written as strings
-- { 'table of strings, which contain lua functions to run' }
->
-  example: attach_events = { 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' }
 
 |child_cycles|                         *cyclecolo_child_cycles*
 
@@ -120,11 +81,29 @@ colorscheme. It also display current value using virtual text. Default is {}
     }}
   } 
 
-|child_cycles_highlight|               *cyclecolo_child_cycles_highlight*
 
-What highlight group will be used for the virtual text that indicates the current
-child cycle value. Default is "comment"
-- 'Highlight Group String'
+|attach_events|                        *cyclecolo_attach_events*
+
+Lua functions to attach to colorscheme change/confirm, written as strings
+- { 'table of strings, which contain lua functions to run' }
+>
+  example: attach_events = { 'dofile("/home/user/.config/nvim/lua/refreshhiglights.lua")' }
+
+
+|hover_colors|                         *cyclecolo_hover_colors*
+
+Whether or not to set colorscheme to current one under the cursor
+A 'preview' of sorts. Default is false.
+- `true` or `false`
+
+
+|close_on_confirm|                     *cyclecolo_close_on_confirm*
+
+Whether or not to close the window on confirm, default is false
+Do note that setting hover_colors will automatically disable this.
+- `true` or `false`
+
+
 
 |mappings|                             *cyclecolo_mappings*
 
@@ -141,4 +120,58 @@ close = "<ESC>", confirm = "<CR>", next_child_cycle = "n", prev_child_cycle = "p
     close = "<ESC>",
     next_child_cycle = "n"
   }
+
+
+
+|preview_text|                         *cyclecolo_preview_text*
+
+What string to set in the preview window
+- 'string'
+>
+  example: preview_text = [[
+  function exampleHere() {
+    console.log("foo bar")
+  }]]
+
+
+|preview_text_syntax|                  *cyclecolo_preview_text_syntax*
+
+What syntax will be used in the preview window
+- 'filetype'
+>
+  example: preview_text_syntax = 'javascript'
+
+
+
+|window_border|                        *cyclecolo_window_border*
+
+What border will be used for the floating windows. Default is 'single'
+- Check `nvim_open_win` border for options
+
+
+|window_blend|                         *cyclecolo_window_blend*
+
+Transparency of the window, default is 5 
+- 0 (no transparency) - 100 (full tranparency)
+
+
+|window_breakpoint|                    *cyclecolo_window_breakpoint*
+
+When editor size is less than window_breakpoint, it only opens
+the select window, and doesn't open the preview. default is 55
+- Any Number
+
+
+|window_border_highlight|              *cyclecolo_window_border_highlight*
+
+What highlight group will be used for the window border. Default is "FloatBorder"
+- 'Highlight Group String'
+
+
+|child_cycles_highlight|               *cyclecolo_child_cycles_highlight*
+
+What highlight group will be used for the virtual text that indicates the current
+child cycle value. Default is "Comment"
+- 'Highlight Group String'
+
 

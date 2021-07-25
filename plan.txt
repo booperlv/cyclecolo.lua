@@ -13,4 +13,4 @@ TODO:
 +     Add more documentation
 +     Modify the behavior of the indexing, allow the first value in the values array be the first one
 + add hide colorschemes
-  separate into multiple files
++ separate into multiple files
