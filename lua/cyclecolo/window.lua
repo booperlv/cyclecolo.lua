@@ -63,7 +63,6 @@ function window.createPreviewWindow(opts)
   local default_opts = {
     relative="editor",
     border=conf.plugOpts.window_border,
-    style="minimal",
     focusable=false,
   }
   local appliedDefaults = util.tableMerge(default_opts, opts)

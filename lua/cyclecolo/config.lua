@@ -13,18 +13,18 @@ function config.mergeDefaults(opts)
     return result;
   end
   local defaultText = [[
-  local function themePreview()
-    local reasonsToExist = {
-      'cool',
-      'I honestly can\'t think of anything else'
-    }
-    local indexTables = {}
-    for index, reason in pairs(reasonsToExist) do
-      table.insert(indexTables, {index, reason})
-    end
-    return indexTables
+local function themePreview()
+  local reasonsToExist = {
+    'cool',
+    'I honestly can\'t think of anything else'
+  }
+  local indexTables = {}
+  for index, reason in pairs(reasonsToExist) do
+    table.insert(indexTables, {index, reason})
   end
-  themePreview()]]
+  return indexTables
+end
+themePreview()]]
 
   local default_opts = {
     filter_colorschemes = {},
