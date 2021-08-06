@@ -53,9 +53,8 @@ function childcycle.incrementChildCycles(count)
     childcycle.setVirtualTextWithValueToRow(require'cyclecolo.window'.selectbuf, nextValue, colorscheme)
   end
 
-  local win = require'cyclecolo.window'
   local conf = require'cyclecolo.config'
-  local currentHovered = util.getContentOfCurrentRow(win.selectwin, win.selectbuf)
+  local currentHovered = util.getContentOfCurrentRow()
   for _, childObject in pairs(conf.plugOpts.child_cycles) do
     if util.exists_in(util.arrayOfColorschemes, childObject.colorscheme) then
       if childObject.colorscheme == currentHovered then

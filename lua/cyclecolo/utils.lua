@@ -35,11 +35,8 @@ function utils.get_index (tab, val)
   end
 end
 
-function utils.getContentOfCurrentRow(win, buf)
-    local cursor = vim.api.nvim_win_get_cursor(win)
-    local row = cursor[1]
-    local rowContent = vim.api.nvim_buf_get_lines(buf, row-1, row, true)
-    return rowContent[1]
+function utils.getContentOfCurrentRow()
+    return vim.fn.getline(".")
 end
 
 return utils

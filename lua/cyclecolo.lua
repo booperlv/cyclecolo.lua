@@ -108,7 +108,7 @@ end
 function cyclecolo.confirm()
   local util = require'cyclecolo.utils'
   local function setColoBasedOnLineContent()
-    local currentHovered = util.getContentOfCurrentRow(require'cyclecolo.window'.selectwin,require'cyclecolo.window'.selectbuf)
+    local currentHovered = util.getContentOfCurrentRow()
     if currentHovered ~= '' then
       vim.o.background = util.defaultBackground
       vim.cmd('colorscheme '..currentHovered)
