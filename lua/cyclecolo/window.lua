@@ -50,6 +50,8 @@ function window.createSelectWindow(opts)
     end
     return returnValue
   end
+
+  vim.api.nvim_buf_set_option(window.selectbuf, "filetype", "CycleColoWindow")
   vim.api.nvim_buf_set_lines(window.selectbuf, 0, 1, true, filterColorschemes())
   window.createdSelect = true
 end

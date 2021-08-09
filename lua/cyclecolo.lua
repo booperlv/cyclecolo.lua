@@ -39,17 +39,15 @@ function cyclecolo.open()
 
   require'cyclecolo.childcycle'.setInitialVirtualText(win.selectbuf)
 
-  if conf.plugOpts.hover_colors == true then
-    vim.api.nvim_command([[augroup cyclecolo_autocommands]])
-    vim.api.nvim_command([[autocmd CursorMoved * lua require('cyclecolo.hover').setPreviewHighlights()]])
-    vim.api.nvim_command([[augroup END]])
-  end
-
   vim.cmd([[
-  augroup cyclecolo_buf_exit
-  autocmd BufLeave * ColoClose
-  augroup END
+    augroup cyclecolo_autocommands
+      autocmd!
+      autocmd BufLeave <buffer> ColoClose
   ]])
+  if conf.plugOpts.hover_colors == true then
+    vim.cmd("autocmd CursorMoved <buffer> lua require('cyclecolo.hover').setPreviewHighlights()")
+  end
+  vim.cmd("augroup END")
 
   --Map these to the select window, so that when it is deleted the mapping delete as well
   vim.api.nvim_buf_set_keymap(win.selectbuf, 'n', conf.plugOpts.mappings.close, ":ColoClose<CR>", {})
@@ -90,18 +88,12 @@ function cyclecolo.close()
 
   vim.opt.modifiable = true
 
-  local conf = require'cyclecolo.config'
-  if conf.plugOpts.hover_colors == true then
-    vim.api.nvim_command([[augroup cyclecolo_autocommands]])
-    vim.api.nvim_command([[autocmd!]])
-    vim.api.nvim_command([[augroup END]])
-  end
-
   vim.cmd([[
-  augroup cyclecolo_buf_exit
-  autocmd!
-  augroup END
+    augroup cyclecolo_autocommands
+      autocmd!
+    augroup END
   ]])
+
   isCycleOpen = false
 end
 
@@ -121,7 +113,7 @@ function cyclecolo.confirm()
     cyclecolo.close()
   end
   for _, value in pairs(conf.plugOpts.attach_events) do
-    vim.api.nvim_command('lua '..value)
+    vim.cmd('lua '..value)
   end
 end
 
