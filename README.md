@@ -3,9 +3,6 @@
 
 Just a heads up, this will eventually be no longer maintained in favor of
 creating something with similar functionality as an extension to a fuzzy finder.
-It will likely be for [snap](https://github.com/camspiers/snap) instead of
-[telescope](https://github.com/nvim-telescope/telescope.nvim) though, as it is
-personally what I use.
 
 https://user-images.githubusercontent.com/65604882/124722836-06804200-df3d-11eb-92cd-cbff1294e3cf.mp4
 
